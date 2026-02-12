@@ -1,0 +1,11 @@
+dwnifi:
+https://192.168.180.171:8443/nifi/#
+Username: admin
+Password: AdminNifi@2026!
+-------------------------------------------
+
+dwdata:
+URL: https://192.168.180.173:8443/nifi
+Username: admin
+Password: admin
+-----------------------------------------

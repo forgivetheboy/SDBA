@@ -1,0 +1,67 @@
+Cron jobs summary for /etc/cron.d/pg-maintenance
+Generated: 2026-02-04
+Host: claimants-testdb (192.168.180.166)
+
+1) Schedule: 59 23 * * *
+   Command: /opt/pg-maintenance/scripts/pg_basebackup.sh >> /opt/pg-maintenance/logs/pg_basebackup_cron.log 2>&1
+   Script: pg_basebackup.sh
+   Success group: CLAIMANTS-SUPPORT
+   Failure group: CLAIMANTS-SUPPORT
+   Notes: Daily base backup
+
+2) Schedule: */5 * * * *
+   Command: /opt/pg-maintenance/scripts/wal_archive_sync.sh > /dev/null 2>&1
+   Script: wal_archive_sync.sh
+   Success group: (not defined)
+   Failure group: SDBA
+   Notes: WAL archive synchronization every 5 minutes
+
+3) Schedule: 0 2 * * *
+   Command: /opt/pg-maintenance/scripts/vacuum_analyze.sh >> /opt/pg-maintenance/logs/vacuum_cron.log 2>&1
+   Script: vacuum_analyze.sh
+   Success group: CLAIMANTS-SUPPORT
+   Failure group: SDBA
+   Notes: Daily VACUUM/ANALYZE at 02:00
+
+4) Schedule: 0 17 * * 6
+   Command: /opt/pg-maintenance/scripts/index_bloat_check.sh >> /opt/pg-maintenance/logs/index_bloat_cron.log 2>&1
+   Script: index_bloat_check.sh
+   Success group: CLAIMANTS-SUPPORT
+   Failure group: SDBA
+   Notes: Weekly index bloat check (Saturday 17:00)
+
+5) Schedule: 0 18 * * 0
+   Command: /opt/pg-maintenance/scripts/wal_archive_cleanup.sh >> /opt/pg-maintenance/logs/wal_cleanup_cron.log 2>&1
+   Script: wal_archive_cleanup.sh
+   Success group: CLAIMANTS-SUPPORT
+   Failure group: SDBA
+   Notes: Weekly WAL cleanup (Sunday 18:00)
+
+6) Schedule: */5 * * * *
+   Command: /opt/pg-maintenance/scripts/system_monitor.sh
+   Script: system_monitor.sh
+   Success group: CLAIMANTS-SUPPORT (used in some checks inside script)
+   Failure group: SDBA (used for multiple alert conditions inside script)
+   Notes: System monitoring every 5 minutes; alerts sent to CLAIMANTS-SUPPORT and SDBA depending on the check
+
+7) Schedule: 0 13 * * *
+   Command: /opt/pg-maintenance/scripts/daily_perf_report.sh >> /opt/pg-maintenance/logs/daily_report_cron.log 2>&1
+   Script: daily_perf_report.sh
+   Success group: (not defined as variable)
+   Failure group / contact: mentions SDBA in the report and contact text
+   Notes: Daily performance report at 13:00; the script message references the SDBA team for questions
+
+8) Schedule: 0 7 * * *
+   Command: /opt/pg-maintenance/scripts/pg_amcheck.sh
+   Script: pg_amcheck.sh
+   Success group: CLAIMANTS-SUPPORT
+   Failure group: SDBA
+   Notes: Daily integrity check (pg_amcheck) at 07:00
+
+---
+Location of scripts: /opt/pg-maintenance/scripts/
+Logs (as referenced in cron): /opt/pg-maintenance/logs/
+
+Notes:
+- Some scripts call send_alert.sh directly with literal group names (e.g., system_monitor.sh uses both "CLAIMANTS-SUPPORT" and "SDBA").
+- If you want, I can add log rotation for /opt/pg-maintenance/logs or normalize alert-group variables across scripts.

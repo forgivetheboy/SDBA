@@ -1,0 +1,42 @@
+NiFi Setup Summary
+
+- NiFi Version: 2.7.2
+- Service User: nifi (ownership assign to moses.chicco)
+- Systemd Service: nifi.service (enabled for persistence/autostart)
+- JAVA_HOME: Set via /etc/profile.d/java.sh
+
+Extensions (NARs) in /opt/nifi/extensions:
+- nifi-hadoop-libraries-nar-2.7.2.nar
+- nifi-hadoop-nar-2.7.2.nar
+- nifi-record-serialization-services-nar-2.7.2.nar
+- nifi-aws-nar-2.7.2.nar
+- nifi-azure-nar-2.7.2.nar
+- nifi-kafka-nar-2.7.2.nar
+- nifi-mongodb-nar-2.7.2.nar
+- nifi-iceberg-aws-nar-2.7.2.nar
+- ... (many more for cloud, messaging, DB, etc.)
+
+Libraries (JARs) in /opt/nifi/lib:
+- mssql-jdbc-12.6.1.jre11.jar
+- ojdbc8.jar
+- postgresql-42.7.3.jar
+- logback-classic-1.5.22.jar
+- slf4j-api-2.0.17.jar
+- ... (core NiFi/Java libraries)
+
+Ports and Web UI:
+- HTTPS enabled: nifi.web.https.host=0.0.0.0
+- HTTPS port: nifi.web.https.port=9090
+- HTTP/HTTPS protocols: h2, http/1.1
+- Site-to-site port: nifi.remote.input.socket.port (check config for value)
+- Web UI access: https://192.168.180.173:9090/nifi
+
+Ownership:
+- All files currently owned by moses.chicco (should be nifi for service operation)
+
+Summary:
+- NiFi 2.7.2 install with a rich set of NARs for Hadoop, cloud, messaging, and DB integration
+- JDBC drivers for SQL Server, Oracle, and Postgres present
+- Web UI available over HTTPS on port 9090
+- For full functionality, ensure nifi user owns all files and service is running
+- set login name to "admin" and password "AdminNifi@2026!"

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<template>
+  <description>NiFi Extraction to HDFS (Bronze) Flow</description>
+  <groupId>nifi-flow-001</groupId>
+  <name>Extraction_to_HDFS_Bronze</name>
+  <snippet>
+    <processGroups>
+      <!-- MSSQL Extraction Group -->
+      <processGroup>
+        <name>MSSQL_Extraction</name>
+        <processors>
+          <processor><name>GenerateFlowFile</name></processor>
+          <processor><name>ExecuteSQL</name></processor>
+          <processor><name>ConvertRecord</name></processor>
+          <processor><name>UpdateAttribute</name></processor>
+        </processors>
+        <outputPorts>
+          <outputPort><name>toHDFS</name></outputPort>
+        </outputPorts>
+      </processGroup>
+      <!-- Postgres Extraction Group -->
+      <processGroup>
+        <name>Postgres_Extraction</name>
+        <processors>
+          <processor><name>GenerateFlowFile</name></processor>
+          <processor><name>ExecuteSQL</name></processor>
+          <processor><name>ConvertRecord</name></processor>
+          <processor><name>UpdateAttribute</name></processor>
+        </processors>
+        <outputPorts>
+          <outputPort><name>toHDFS</name></outputPort>
+        </outputPorts>
+      </processGroup>
+      <!-- Oracle Extraction Group -->
+      <processGroup>
+        <name>Oracle_Extraction</name>
+        <processors>
+          <processor><name>GenerateFlowFile</name></processor>
+          <processor><name>ExecuteSQL</name></processor>
+          <processor><name>ConvertRecord</name></processor>
+          <processor><name>UpdateAttribute</name></processor>
+        </processors>
+        <outputPorts>
+          <outputPort><name>toHDFS</name></outputPort>
+        </outputPorts>
+      </processGroup>
+      <!-- toHDFS Group -->
+      <processGroup>
+        <name>toHDFS</name>
+        <inputPorts>
+          <inputPort><name>fromExtraction</name></inputPort>
+        </inputPorts>
+        <processors>
+          <processor><name>PutHDFS</name></processor>
+        </processors>
+      </processGroup>
+    </processGroups>
+    <connections>
+      <connection>
+        <sourceGroup>MSSQL_Extraction</sourceGroup>
+        <sourcePort>toHDFS</sourcePort>
+        <destinationGroup>toHDFS</destinationGroup>
+        <destinationPort>fromExtraction</destinationPort>
+      </connection>
+      <connection>
+        <sourceGroup>Postgres_Extraction</sourceGroup>
+        <sourcePort>toHDFS</sourcePort>
+        <destinationGroup>toHDFS</destinationGroup>
+        <destinationPort>fromExtraction</destinationPort>
+      </connection>
+      <connection>
+        <sourceGroup>Oracle_Extraction</sourceGroup>
+        <sourcePort>toHDFS</sourcePort>
+        <destinationGroup>toHDFS</destinationGroup>
+        <destinationPort>fromExtraction</destinationPort>
+      </connection>
+    </connections>
+  </snippet>
+</template>

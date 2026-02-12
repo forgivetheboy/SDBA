@@ -1,0 +1,25 @@
+NETWORK FOLDERS
+-------------------------------------------------------------------
+\\DB-BACKUPS\sdba
+\\files\ict$\Others\s_dba
+\\192.168.180.161\DB_BACKUPS$
+\\pdc1.ursb.local\Profiles\
+
+-------------------------------------------------------------------
+simpodevdbursb - 
+   Connection-specific DNS Suffix  . : ursb.local
+   IPv4 Address. . . . . . . . . . . : 180.155
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 3.1
+
+simpodevdb - 
+   Connection-specific DNS Suffix  . : ursb.local
+   IPv4 Address. . . . . . . . . . . : 3.106
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 3.1
+
+simpodb - 
+  Connection-specific DNS Suffix  .  : ursb.local
+   IPv4 Address. . . . . . . . . . . : 3.103
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.3.1

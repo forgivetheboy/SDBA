@@ -1,0 +1,17 @@
+<connectionStrings>
+  <add name="CBLDataContext"
+       connectionString="Data Source=simpo-lis;
+                         Initial Catalog=SIMPODB;
+                         Integrated Security=False;
+                         User ID=appsimprs;
+                         Password=appsimprs@123;
+                         MultiSubnetFailover=True"
+       providerName="System.Data.SqlClient" />
+
+  <add name="CRLHealthMonitoring"
+       connectionString="Data Source=simpo-lis;
+                         Initial Catalog=CRLHealthMonitoring;
+                         Integrated Security=True;
+                         MultiSubnetFailover=True"
+       providerName="System.Data.SqlClient" />
+</connectionStrings>

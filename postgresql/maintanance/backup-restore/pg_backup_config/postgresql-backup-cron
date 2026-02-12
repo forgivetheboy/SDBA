@@ -1,0 +1,9 @@
+# PostgreSQL Backup Cron Jobs
+# Base backup: Daily at 5:20 PM
+# WAL sync to SMB: Every 7 minutes
+
+# Daily base backup at 5:20 PM
+20 17 * * * root /opt/postgresql-backup/pg_basebackup.sh >> /var/log/postgresql/pg_basebackup_cron.log 2>&1
+
+# WAL archive sync to SMB every 7 minutes
+*/7 * * * * root /opt/postgresql-backup/wal_cleanup.sh >> /var/log/postgresql/wal_cleanup_cron.log 2>&1

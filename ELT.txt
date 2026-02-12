@@ -1,0 +1,10 @@
+	
+
+dwnifi  192.168.180.171
+dwnamenode    192.168.180.172
+dwdatanode    192.168.180.173
+dwmaster    192.168.180.177
+dwworker    192.168.180.174
+dwpostgresql    192.168.180.175
+dwmetabase    192.168.180.176
+dwtest    192.168.180.178

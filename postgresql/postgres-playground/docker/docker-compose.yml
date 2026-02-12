@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  primary:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    volumes:
+      - primary-data:/var/lib/postgresql/data
+    # Use ./docker/init-primary to place SQL scripts that create replication users
+
+volumes:
+  primary-data:
+
+# NOTE: This compose brings up a single primary useful for testing backups and logical restores.
+# For streaming replication/replica testing see `dr_ha.md` for manual pg_basebackup/standby setup steps.

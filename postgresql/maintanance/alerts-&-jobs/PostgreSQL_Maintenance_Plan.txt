@@ -1,0 +1,245 @@
+================================================================================
+       POSTGRESQL MAINTENANCE PLAN - 192.168.180.166 (claimants-testdb)
+================================================================================
+
+Server: 192.168.180.166
+Database: claimant_db
+PostgreSQL Version: 15
+Date Created: February 3, 2026
+
+================================================================================
+1. VACUUM & ANALYZE (Equivalent to DBCC UPDATEUSAGE + Index maintenance)
+================================================================================
+
+Task                    Frequency               Purpose
+------------------------------------------------------------------------------
+VACUUM ANALYZE          Daily                   Reclaims dead tuples, updates statistics
+VACUUM FULL             Monthly (low activity)  Reclaims disk space, rewrites tables
+ANALYZE                 After bulk loads        Updates query planner statistics
+
+Commands:
+  -- Daily vacuum and analyze
+  VACUUM ANALYZE;
+  
+  -- Full vacuum (locks table - run during maintenance window)
+  VACUUM FULL tablename;
+  
+  -- Analyze specific table
+  ANALYZE tablename;
+
+
+================================================================================
+2. INDEX MAINTENANCE (Equivalent to DBCC INDEXDEFRAG)
+================================================================================
+
+Task                    Frequency               Purpose
+------------------------------------------------------------------------------
+REINDEX DATABASE        Weekly/Monthly          Rebuilds bloated indexes
+Index bloat check       Weekly                  Identify indexes needing rebuild
+Unused index detection  Monthly                 Find indexes to drop
+
+Commands:
+  -- Reindex entire database
+  REINDEX DATABASE claimant_db;
+  
+  -- Reindex specific table
+  REINDEX TABLE tablename;
+  
+  -- Reindex concurrently (no locks, PostgreSQL 12+)
+  REINDEX TABLE CONCURRENTLY tablename;
+  
+  -- Check index bloat
+  SELECT
+      schemaname || '.' || indexrelname AS index_name,
+      pg_size_pretty(pg_relation_size(indexrelid)) AS index_size,
+      idx_scan AS index_scans
+  FROM pg_stat_user_indexes
+  ORDER BY pg_relation_size(indexrelid) DESC;
+  
+  -- Find unused indexes (candidates for removal)
+  SELECT
+      schemaname || '.' || indexrelname AS index,
+      idx_scan AS scans,
+      pg_size_pretty(pg_relation_size(indexrelid)) AS size
+  FROM pg_stat_user_indexes
+  WHERE idx_scan = 0
+  ORDER BY pg_relation_size(indexrelid) DESC;
+
+
+================================================================================
+3. INTEGRITY CHECKS (Equivalent to DBCC CHECKDB)
+================================================================================
+
+Task                    Frequency               Purpose
+------------------------------------------------------------------------------
+pg_amcheck              Weekly                  B-tree index corruption detection
+Constraint validation   Monthly                 Check foreign key integrity
+pg_checksums            On-demand               Data page checksum verification
+
+Commands:
+  -- Run pg_amcheck for corruption detection (from command line)
+  pg_amcheck -d claimant_db --heapallindexed
+  
+  -- Validate all foreign key constraints
+  DO $$
+  DECLARE
+      r RECORD;
+  BEGIN
+      FOR r IN SELECT conname, conrelid::regclass AS table_name
+               FROM pg_constraint WHERE contype = 'f'
+      LOOP
+          RAISE NOTICE 'Validating: %', r.conname;
+      END LOOP;
+  END $$;
+  
+  -- Check for corrupted data pages (requires checksums enabled)
+  -- pg_checksums -c -D /var/lib/postgresql/15/main
+
+
+================================================================================
+4. BLOAT & STATISTICS MONITORING
+================================================================================
+
+Task                    Frequency               Purpose
+------------------------------------------------------------------------------
+Table bloat check       Weekly                  Identify tables needing VACUUM FULL
+pg_stat_statements      Monthly                 Reset query performance stats
+pg_stat_reset()         Quarterly               Reset cumulative statistics
+
+Commands:
+  -- Check table bloat
+  SELECT
+      schemaname || '.' || relname AS table_name,
+      pg_size_pretty(pg_total_relation_size(relid)) AS total_size,
+      pg_size_pretty(pg_relation_size(relid)) AS table_size,
+      n_dead_tup AS dead_tuples,
+      n_live_tup AS live_tuples,
+      CASE WHEN n_live_tup > 0 
+           THEN round(100.0 * n_dead_tup / n_live_tup, 2) 
+           ELSE 0 END AS dead_pct
+  FROM pg_stat_user_tables
+  ORDER BY n_dead_tup DESC
+  LIMIT 20;
+  
+  -- Reset pg_stat_statements (if extension installed)
+  SELECT pg_stat_statements_reset();
+  
+  -- Reset database statistics
+  SELECT pg_stat_reset();
+
+
+================================================================================
+5. CLEANUP & HOUSEKEEPING
+================================================================================
+
+Task                    Frequency               Purpose
+------------------------------------------------------------------------------
+Terminate idle conns    Daily                   Kill idle sessions > X hours
+Log rotation            Daily                   Manage log file sizes
+Temp file cleanup       Daily                   Clear orphaned temp files
+
+Commands:
+  -- Terminate idle connections older than 2 hours
+  SELECT pg_terminate_backend(pid)
+  FROM pg_stat_activity
+  WHERE state = 'idle'
+    AND state_change < NOW() - INTERVAL '2 hours'
+    AND pid <> pg_backend_pid();
+  
+  -- Check current connections
+  SELECT pid, usename, datname, state, query_start, state_change, query
+  FROM pg_stat_activity
+  WHERE datname IS NOT NULL
+  ORDER BY state_change;
+  
+  -- Check temporary files usage
+  SELECT datname, temp_files, temp_bytes
+  FROM pg_stat_database
+  WHERE temp_bytes > 0;
+
+
+================================================================================
+6. RECOMMENDED SCHEDULE
+================================================================================
+
+DAILY MAINTENANCE (5:00 AM)
+------------------------------------------------------------------------------
+  - VACUUM ANALYZE all databases
+  - Terminate idle connections > 2 hours
+  - WAL archive sync to remote storage
+  - Check for long-running queries
+
+WEEKLY MAINTENANCE (Sunday 2:00 AM)
+------------------------------------------------------------------------------
+  - REINDEX databases (concurrently if possible)
+  - Check index and table bloat
+  - Run pg_amcheck for corruption detection
+  - Generate bloat report
+  - Review slow query log
+
+MONTHLY MAINTENANCE (1st of month, 1:00 AM)
+------------------------------------------------------------------------------
+  - VACUUM FULL on high-bloat tables (>20% dead tuples)
+  - Reset pg_stat_statements
+  - Validate foreign key constraints
+  - Generate database health report
+  - Review and drop unused indexes
+  - Update table statistics
+
+QUARTERLY MAINTENANCE
+------------------------------------------------------------------------------
+  - Full database statistics reset
+  - Capacity planning review
+  - Performance baseline comparison
+  - Index usage analysis
+
+
+================================================================================
+7. MONITORING QUERIES
+================================================================================
+
+-- Database size
+SELECT pg_database.datname,
+       pg_size_pretty(pg_database_size(pg_database.datname)) AS size
+FROM pg_database
+ORDER BY pg_database_size(pg_database.datname) DESC;
+
+-- Table sizes
+SELECT schemaname, relname,
+       pg_size_pretty(pg_total_relation_size(relid)) AS total_size
+FROM pg_stat_user_tables
+ORDER BY pg_total_relation_size(relid) DESC
+LIMIT 10;
+
+-- Active queries
+SELECT pid, usename, datname, state, 
+       now() - query_start AS duration, query
+FROM pg_stat_activity
+WHERE state = 'active'
+ORDER BY duration DESC;
+
+-- Lock monitoring
+SELECT l.pid, l.locktype, l.mode, l.granted,
+       a.usename, a.query
+FROM pg_locks l
+JOIN pg_stat_activity a ON l.pid = a.pid
+WHERE NOT l.granted;
+
+-- Replication status (if applicable)
+SELECT client_addr, state, sent_lsn, write_lsn, flush_lsn, replay_lsn
+FROM pg_stat_replication;
+
+
+================================================================================
+8. BACKUP SCHEDULE (Already Configured)
+================================================================================
+
+  - pg_basebackup: Daily at 5:20 PM
+  - WAL archiving: Continuous
+  - Backup location: \\192.168.180.161\db_backups$\CLAIMANTSDB-TEST
+  - Retention: 14 days
+
+
+================================================================================
+                              END OF MAINTENANCE PLAN
+================================================================================

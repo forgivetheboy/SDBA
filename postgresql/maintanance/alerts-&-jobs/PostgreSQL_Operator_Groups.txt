@@ -1,0 +1,106 @@
+================================================================================
+                    POSTGRESQL OPERATOR GROUPS CONFIGURATION
+================================================================================
+Server: 192.168.180.166 (claimants-testdb)
+Database: claimant_db
+Schema: dba_ops
+Generated: February 3, 2026
+================================================================================
+
+================================================================================
+OPERATOR GROUPS
+================================================================================
+
++-------------------+------------------------------------------------+--------+
+| Group Name        | Description                                    | Count  |
++-------------------+------------------------------------------------+--------+
+| CLAIMANTS-SUPPORT | Claimants Portal Support Team                  | 6      |
+|                   | Receives: ALL alerts (Critical, High, Med, Low)|        |
++-------------------+------------------------------------------------+--------+
+| SDBA              | Senior DBA                                     | 1      |
+|                   | Receives: Critical & High alerts only          |        |
++-------------------+------------------------------------------------+--------+
+
+================================================================================
+CLAIMANTS-SUPPORT GROUP MEMBERS
+================================================================================
+
++----+---------------+------------------------------+---------+
+| ID | Operator Name | Email Address                | Enabled |
++----+---------------+------------------------------+---------+
+| 1  | Jerry-Opolot  | jerry.opolot@ursb.go.ug      | Yes     |
+| 2  | Chicco        | moses.chicco@ursb.go.ug      | Yes     |
+| 3  | Saul          | saul.akankwasa@ursb.go.ug    | Yes     |
+| 4  | Bob           | bob.wabusa@ursb.go.ug        | Yes     |
+| 5  | Emanuel       | emanuel.okello@ursb.go.ug    | Yes     |
+| 6  | Norman        | norman.wolimbwa@ursb.go.ug   | Yes     |
++----+---------------+------------------------------+---------+
+
+Email List (comma-separated):
+jerry.opolot@ursb.go.ug, moses.chicco@ursb.go.ug, saul.akankwasa@ursb.go.ug,
+bob.wabusa@ursb.go.ug, emanuel.okello@ursb.go.ug, norman.wolimbwa@ursb.go.ug
+
+================================================================================
+SDBA GROUP MEMBERS
+================================================================================
+
++----+---------------+------------------------------+---------+
+| ID | Operator Name | Email Address                | Enabled |
++----+---------------+------------------------------+---------+
+| 2  | Chicco        | moses.chicco@ursb.go.ug      | Yes     |
++----+---------------+------------------------------+---------+
+
+Email List:
+moses.chicco@ursb.go.ug
+
+================================================================================
+ALERT SEVERITY SUBSCRIPTIONS
+================================================================================
+
++-------------------+----------+------+--------+-----+
+| Group Name        | CRITICAL | HIGH | MEDIUM | LOW |
++-------------------+----------+------+--------+-----+
+| CLAIMANTS-SUPPORT |    X     |  X   |   X    |  X  |
+| SDBA              |    X     |  X   |   -    |  -  |
++-------------------+----------+------+--------+-----+
+
+================================================================================
+SMTP CONFIGURATION
+================================================================================
+
+SMTP Server:     smtp.ursb.go.ug
+SMTP Port:       587
+From Address:    moses.chicco@ursb.go.ug
+TLS:             Enabled
+Authentication:  LOGIN
+Status:          VERIFIED WORKING
+
+================================================================================
+USEFUL QUERIES
+================================================================================
+
+-- Get all recipients for a severity level:
+SELECT dba_ops.get_recipients_by_severity('CRITICAL');
+
+-- Get all recipients for a group:
+SELECT dba_ops.get_recipients_by_group('CLAIMANTS-SUPPORT');
+
+-- View operator group summary:
+SELECT * FROM dba_ops.v_operator_group_summary;
+
+-- Add new operator:
+INSERT INTO dba_ops.operators (operator_name, email_address) 
+VALUES ('New Person', 'new.person@ursb.go.ug');
+
+-- Add operator to group:
+INSERT INTO dba_ops.operator_group_members (group_id, operator_id)
+SELECT 
+    (SELECT group_id FROM dba_ops.operator_groups WHERE group_name = 'CLAIMANTS-SUPPORT'),
+    (SELECT operator_id FROM dba_ops.operators WHERE operator_name = 'New Person');
+
+-- Disable an operator:
+UPDATE dba_ops.operators SET is_enabled = FALSE WHERE operator_name = 'Person Name';
+
+================================================================================
+END OF DOCUMENT
+================================================================================

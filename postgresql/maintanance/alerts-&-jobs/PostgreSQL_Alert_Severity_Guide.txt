@@ -1,0 +1,169 @@
+================================================================================
+                    POSTGRESQL DATABASE ALERT SEVERITY GUIDE
+================================================================================
+Server: 192.168.180.166 (claimants-testdb)
+PostgreSQL Version: 15
+Generated: February 3, 2026
+================================================================================
+
+SMTP server : smtp.ursb.go.ug
+SMTP Port : 587 
+From email address : moses.chicc@ursb.go.ug
+Mail Subject/Display Name : CLAIMANTS-TESTDB ALERTS
+SMTP authentication (Basic Auth) : username (moses.chicco@ursb.go.ug) password (V3nd3++@477753)
+TLS/SSL - yes
+
+
+================================================================================
+CRITICAL ALERTS (Immediate Action Required)
+================================================================================
+
++---------------------------+--------------------------------------------------+
+| Alert                     | Description                                      |
++---------------------------+--------------------------------------------------+
+| Backup Failure            | Base backup or WAL archiving failed              |
+| Replication Lag > Thresh  | Standby significantly behind primary             |
+| Database Down             | PostgreSQL service not responding                |
+| Disk Space Critical       | Data/WAL disk > 90% full                         |
+| Connection Pool Exhausted | Max connections reached                          |
+| Corruption Detected       | pg_amcheck finds data corruption                 |
++---------------------------+--------------------------------------------------+
+
+Recommended Response Time: IMMEDIATE (within 15 minutes)
+Escalation: DBA Team Lead, System Administrator
+
+--------------------------------------------------------------------------------
+
+================================================================================
+HIGH SEVERITY ALERTS (Action Within Hours)
+================================================================================
+
++---------------------------+--------------------------------------------------+
+| Alert                     | Description                                      |
++---------------------------+--------------------------------------------------+
+| Long-Running Queries      | Queries exceeding time threshold (e.g., >30 min) |
+| Blocked Sessions          | Lock waits exceeding threshold                   |
+| WAL Accumulation          | WAL files piling up (archiving issues)           |
+| High CPU/Memory           | Resource utilization > 85%                       |
+| Autovacuum Not Running    | Tables not being vacuumed                        |
+| Failed Login Attempts     | Repeated authentication failures                 |
++---------------------------+--------------------------------------------------+
+
+Recommended Response Time: Within 2-4 hours
+Escalation: DBA Team
+
+--------------------------------------------------------------------------------
+
+================================================================================
+MEDIUM SEVERITY ALERTS (Review Within 24 Hours)
+================================================================================
+
++---------------------------+--------------------------------------------------+
+| Alert                     | Description                                      |
++---------------------------+--------------------------------------------------+
+| Table Bloat               | Tables > 30% bloat                               |
+| Index Bloat               | Indexes needing reindex                          |
+| Slow Queries              | Queries exceeding normal duration                |
+| Checkpoint Warnings       | Checkpoints occurring too frequently             |
+| Temp File Usage           | Large temporary files being created              |
+| Backup Age                | Last backup older than expected                  |
++---------------------------+--------------------------------------------------+
+
+Recommended Response Time: Within 24 hours (next business day)
+Escalation: DBA Team (routine)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+LOW SEVERITY ALERTS (Informational)
+================================================================================
+
++---------------------------+--------------------------------------------------+
+| Alert                     | Description                                      |
++---------------------------+--------------------------------------------------+
+| Backup Completed          | Daily backup confirmation                        |
+| Scheduled Job Completed   | pgAgent job status                               |
+| Statistics Summary        | Daily database stats report                      |
+| Maintenance Completed     | VACUUM/REINDEX completed                         |
++---------------------------+--------------------------------------------------+
+
+Recommended Response Time: Review during daily check
+Escalation: None (informational only)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+RECOMMENDED MINIMUM ALERT CONFIGURATION
+================================================================================
+
+Priority implementation order:
+
+  [x] 1. Backup failure/success notifications
+  [x] 2. pgAgent job failure alerts
+  [x] 3. Disk space warnings (>80%, >90%)
+  [x] 4. Long-running query alerts (>30 minutes)
+  [x] 5. Replication lag monitoring (if using standby)
+  [x] 6. Database connectivity check
+  [x] 7. Connection count monitoring
+
+================================================================================
+ALERT THRESHOLDS (Customizable)
+================================================================================
+
+Disk Space:
+  - Warning:  80% utilization
+  - Critical: 90% utilization
+
+Query Duration:
+  - Warning:  15 minutes
+  - Critical: 30 minutes
+
+Connection Count:
+  - Warning:  80% of max_connections
+  - Critical: 95% of max_connections
+
+Replication Lag:
+  - Warning:  5 minutes
+  - Critical: 15 minutes
+
+Table Bloat:
+  - Warning:  20%
+  - Critical: 40%
+
+WAL Files Pending:
+  - Warning:  50 files
+  - Critical: 100 files
+
+Backup Age:
+  - Warning:  25 hours (missed daily backup)
+  - Critical: 49 hours (missed 2 daily backups)
+
+================================================================================
+SMTP CONFIGURATION REQUIRED
+================================================================================
+
+To enable email alerts, provide the following:
+
+  1. SMTP Server:      ___________________________________
+  2. SMTP Port:        ___________________________________
+  3. From Address:     ___________________________________
+  4. To Address(es):   ___________________________________
+  5. SMTP Username:    ___________________________________
+  6. SMTP Password:    ___________________________________
+  7. TLS/SSL:          [ ] Yes  [ ] No
+
+================================================================================
+IMPLEMENTATION COMPONENTS
+================================================================================
+
+Once SMTP is configured, the following will be set up:
+
+  1. msmtp           - Lightweight SMTP client for sending mail
+  2. Shell scripts   - Alert checking and notification scripts
+  3. Cron jobs       - Scheduled monitoring checks
+  4. pgAgent jobs    - Database-level job monitoring
+  5. Log monitoring  - PostgreSQL log file analysis
+
+================================================================================
+END OF DOCUMENT
+================================================================================

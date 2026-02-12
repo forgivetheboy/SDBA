@@ -1,2 +1,2 @@
-# SDBA
-Here goes nothing!
+# Just-A-DBA
+database design and admin
